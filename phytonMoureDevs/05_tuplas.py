@@ -33,4 +33,4 @@ print(my_list)
 
 
 del my_other_tuple
-print(my_other_tuple)
+##print(my_other_tuple)
