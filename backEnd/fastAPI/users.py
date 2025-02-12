@@ -1,5 +1,4 @@
-from pickle import FALSE
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -45,10 +44,10 @@ def search_user(id: int):
     except:
         return {"ERROR": "no se ha encontrado el id"}
     
-@app.post("/user/")
+@app.post("/user/", status_code=201)
 async def user(user: User):
     if type(search_user(user.id)) == User:
-        return {"error": "usuario ya existente"}
+        raise HTTPException(status_code=404, detail= "el usuario ya existe")
     else:
         users_list.append(user)
         return user
