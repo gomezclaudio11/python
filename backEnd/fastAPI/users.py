@@ -1,3 +1,4 @@
+from pickle import FALSE
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -43,3 +44,34 @@ def search_user(id: int):
         return list(users)[0]
     except:
         return {"ERROR": "no se ha encontrado el id"}
+    
+@app.post("/user/")
+async def user(user: User):
+    if type(search_user(user.id)) == User:
+        return {"error": "usuario ya existente"}
+    else:
+        users_list.append(user)
+        return user
+
+@app.put("/user/")
+async def user(user : User):
+    found = False
+
+    for index, saved_user in enumerate(users_list):
+        if saved_user.id == user.id:
+            users_list[index] = user
+            found = True
+    if not found:
+        return {"ERROR": "usuario noactualizado"}
+    else:
+        return user
+    
+@app.delete("/user/{id}")
+async def user(id: int):
+    found = False
+    for index, saved_user in enumerate(users_list):
+        if saved_user.id == id:
+            del users_list[index]
+            found = True
+    if not found:
+        return {"error": "no se ha eliminado el usuario"}
