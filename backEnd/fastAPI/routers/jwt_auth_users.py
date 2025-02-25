@@ -54,13 +54,19 @@ async def auth_user (token: str = Depends(oauth2)):
     exception = HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED , 
                 detail="credenciales de autenticacion invalidas",
-                headers={"www-Authenticate": "Bearer"})
+                headers={"WWW-Authenticate": "Bearer"})
     try:
-        username = jwt.decode(token, SECRET, algorithms=[ALGORITHM]).get("sub")
+        payload = jwt.decode(token, SECRET, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
         if username is None:
             raise exception
     except JWTError:
         raise exception
+    user = search_user(username)
+    if user is None:
+        raise exception
+
+    return user
 
 async def current_user(user: User = Depends(auth_user)):
     
@@ -72,7 +78,7 @@ async def current_user(user: User = Depends(auth_user)):
     return user
     
 
-@router.post("/login")
+@router.post("/login2")
 async def login(form : OAuth2PasswordRequestForm = Depends()):
     user_db = users_db.get(form.username)
     if not user_db:
@@ -92,6 +98,6 @@ async def login(form : OAuth2PasswordRequestForm = Depends()):
                    "exp": expire}
     return{"acces_token": jwt.encode(access_token, SECRET, algorithm=ALGORITHM), "token_type": "bearer"}
 
-@router.get("/users/me")
+@router.get("/users/me2")
 async def me(user: User = Depends(current_user)):
     return user
